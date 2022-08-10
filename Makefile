@@ -9,6 +9,10 @@ dev: rnnoise
 	mkdir -p bin/
 	go generate
 	go build -ldflags '-X main.nameSuffix=${NAME_SUFFIX}_(dev) -X main.version=${VERSION} -X main.websiteURL=${WEBSITE_URL}' -o bin/noisetorch
+utest: rnnoise
+	mkdir -p bin/
+	go generate
+	CGO_ENABLED=0 GOOS=linux go build -trimpath -tags release -a -ldflags '-s -w -extldflags "-static" -X main.nameSuffix=${NAME_SUFFIX}_(dev_update_test) -X main.version=0.0.0 -X main.distribution=official -X main.updateURL=${UPDATE_URL} -X main.publicKeyString=${UPDATE_PUBKEY} -X main.websiteURL=${WEBSITE_URL}' -o bin/noisetorch
 release: rnnoise
 	mkdir -p bin/
 	mkdir -p tmp/
