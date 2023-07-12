@@ -24,9 +24,10 @@ PulseAudio support is being dropped when compared to NoiseTorch-ng to allow for 
 Don't forget to leave a star ⭐ if this sounds useful to you! 
 
 ## Roadmap
-* Update roadmap as needed
+Update roadmap as needed
 * [x] Gut autoupdating code
 * [x] Remove support for PulseAudio
+* [x] Remove broken features (output device filtering on pw)
 * [x] Test
 * [ ] Deploy via flathub
 
