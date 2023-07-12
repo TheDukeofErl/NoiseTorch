@@ -24,7 +24,7 @@ A clear and concise description of what you expected to happen.
 If applicable, add screenshots to help explain your problem.
 
 **Logs**
-If applicable, add the link to a pastebin with the output of `noisetorch -log` and `pactl list short`.
+If applicable, add the link to a pastebin with the output of `yant -log` and `pactl list short`.
 
 **Desktop (please complete the following information):**
  - Distribution [e.g. Ubuntu 22.04, Arch]: 
