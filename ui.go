@@ -334,8 +334,14 @@ func connectView(ctx *ntcontext, w *nucular.Window) {
 }
 
 func pulseAudioUnsupported(ctx *ntcontext, w *nucular.Window) {
-	w.Row(15).Dynamic(1)
+	w.Row(50).Dynamic(1)
 	w.Label("PulseAudio is no longer supported, please use Pipewire.", "CB")
+	w.Row(20).Dynamic(1)
+	w.Spacing(1)
+	if w.ButtonText("Exit") {
+		os.Exit(0)
+		return
+	}
 }
 
 func makeErrorView(ctx *ntcontext, errorMsg string) ViewFunc {
