@@ -133,11 +133,7 @@ func getSources(ctx *ntcontext, client *pulseaudio.Client) []device {
 		var inp device
 
 		inp.ID = sources[i].Name
-		if ctx.serverInfo.servertype == servertype_pulse {
-			inp.Name = sources[i].PropList["device.description"]
-		} else {
-			inp.Name = sources[i].Description
-		}
+		inp.Name = sources[i].Description
 		inp.isMonitor = (sources[i].MonitorSourceIndex != 0xffffffff)
 		inp.rate = sources[i].SampleSpec.Rate
 
@@ -167,11 +163,7 @@ func getSinks(ctx *ntcontext, client *pulseaudio.Client) []device {
 		var inp device
 
 		inp.ID = sources[i].Name
-		if ctx.serverInfo.servertype == servertype_pulse {
-			inp.Name = sources[i].PropList["device.description"]
-		} else {
-			inp.Name = sources[i].Description
-		}
+		inp.Name = sources[i].Description
 		inp.rate = sources[i].SampleSpec.Rate
 
 		// PA_SINK_DYNAMIC_LATENCY = 0x0080U

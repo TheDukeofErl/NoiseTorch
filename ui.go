@@ -417,6 +417,11 @@ func capabilitiesView(ctx *ntcontext, w *nucular.Window) {
 	}
 }
 
+func pulseAudioUnsupported(ctx *ntcontext, w *nucular.Window) {
+	w.Row(15).Dynamic(1)
+	w.Label("PulseAudio is no longer supported, please use Pipewire.", "CB")
+}
+
 func makeErrorView(ctx *ntcontext, errorMsg string) ViewFunc {
 	return func(ctx *ntcontext, w *nucular.Window) {
 		w.Row(15).Dynamic(1)
@@ -472,8 +477,12 @@ func resetUI(ctx *ntcontext) {
 	ctx.views = NewViewStack()
 	ctx.views.Push(mainView)
 
-	if !ctx.haveCapabilities {
-		ctx.views.Push(capabilitiesView)
+	// if !ctx.haveCapabilities {
+	// 	ctx.views.Push(capabilitiesView)
+	// }
+
+	if ctx.serverInfo.servertype == servertype_pulse {
+		ctx.views.Push(pulseAudioUnsupported)
 	}
 
 	if ctx.serverInfo.outdatedPipeWire {
