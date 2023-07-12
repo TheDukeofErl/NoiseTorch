@@ -13,7 +13,7 @@ import (
 
 type CLIOpts struct {
 	doLog       bool
-	sourceName    string
+	sourceName  string
 	unload      bool
 	loadInput   bool
 	threshold   int
