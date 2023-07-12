@@ -25,10 +25,10 @@ Don't forget to leave a star ⭐ if this sounds useful to you!
 
 ## Roadmap
 * Update roadmap as needed
-* Gut autoupdating code
-* Remove support for PulseAudio
-* Test
-* Deploy via flathub
+* [x] Gut autoupdating code
+* [x] Remove support for PulseAudio
+* [x] Test
+* [ ] Deploy via flathub
 
 ## Features
 * Simple setup for microphone denoising
