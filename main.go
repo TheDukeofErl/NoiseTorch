@@ -288,7 +288,7 @@ func fixWindowClass() {
 			n, _ := ewmh.WmNameGet(xu, w)
 			if n == appName {
 				_, err := icccm.WmClassGet(xu, w)
-				//if we have *NO* WM_CLASS, then the above ll errors. We *want* to make sure this errors
+				//if we have *NO* WM_CLASS, then the above call errors. We *want* to make sure this errors
 				if err == nil {
 					continue
 				}
