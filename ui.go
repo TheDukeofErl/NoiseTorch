@@ -1,4 +1,4 @@
-// This file is part of the program "NoiseTorch-ng".
+// This file is part of the program "yant".
 // Please see the LICENSE file for copyright information.
 
 package main
@@ -52,7 +52,7 @@ var red = color.RGBA{255, 70, 70, 255}
 var orange = color.RGBA{255, 140, 0, 255}
 var lightBlue = color.RGBA{173, 216, 230, 255}
 
-const notice = "NoiseTorch Next Gen (stylized NoiseTorch-ng) is a continuation of the NoiseTorch\nproject after it was abandoned by its original author. Please do not confuse\nboth programs. You may convey modified versions of this program under its name."
+const notice = "Yet another noise tool (yant) is a fork of NoiseTorch/NoiseTorch-ng."
 
 func updatefn(ctx *ntcontext, w *nucular.Window) {
 	currView := ctx.views.Peek()

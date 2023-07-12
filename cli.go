@@ -1,4 +1,4 @@
-// This file is part of the program "NoiseTorch-ng".
+// This file is part of the program "yant".
 // Please see the LICENSE file for copyright information.
 
 package main

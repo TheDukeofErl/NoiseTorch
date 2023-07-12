@@ -1,4 +1,4 @@
-// This file is part of the program "NoiseTorch-ng".
+// This file is part of the program "yant".
 // Please see the LICENSE file for copyright information.
 
 package main
@@ -41,7 +41,7 @@ type device struct {
 	rate           uint32
 }
 
-var appName = "NoiseTorch-ng"
+var appName = "yant"
 
 var nameSuffix = ""         // will be changed by build
 var version = "unknown"     // ditto

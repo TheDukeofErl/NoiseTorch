@@ -1,5 +1,5 @@
 <h1 align="center"> yant</h1>
-<h3 align="center"> Yet another noise tool, a noise suppression program for PulseAudio or Pipewire</h3>
+<h3 align="center"> Yet another noise tool, a noise suppression program for Pipewire</h3>
 <p align="center"><img src="https://raw.githubusercontent.com/TheDukeofErl/yant/master/assets/icon/noisetorch.png" width="100" height="100"></p> 
 
 
@@ -17,7 +17,9 @@
 [stars-shield]: https://img.shields.io/github/stars/noisetorch/NoiseTorch?maxAge=2592000
 [stars-url]: https://github.com/noisetorch/NoiseTorch/stargazers/
 
-Yet another noise tool, or yant, is an easy to use open source application for Linux with PulseAudio or PipeWire. A fork from NoiseTorch/NoiseTorch-ng, it creates a virtual microphone that suppresses noise in any application using [RNNoise](https://github.com/xiph/rnnoise). Use whichever conferencing or VOIP application you like and simply select the filtered Virtual Microphone as input to torch the sound of your mechanical keyboard, computer fans, trains and the likes.
+Yet another noise tool, or yant, is an easy to use open source application for Linux with PipeWire. A fork from NoiseTorch/NoiseTorch-ng, it creates a virtual microphone that suppresses noise in any application using [RNNoise](https://github.com/xiph/rnnoise). Use whichever conferencing or VOIP application you like and simply select the filtered Virtual Microphone as input to torch the sound of your mechanical keyboard, computer fans, trains and the likes.
+
+PulseAudio support is being dropped when compared to NoiseTorch-ng to allow for distribution via flatpak.
 
 Don't forget to leave a star ⭐ if this sounds useful to you! 
 
@@ -53,9 +55,9 @@ Once ya nt has been loaded, feel free to close the window, the virtual microphon
 
 ### Latency
 
-Yant may introduce a small amount of latency for microphone filtering. The amount of inherent latency introduced by noise supression is 10ms, this is very low and should not be a problem. Additionally PulseAudio currently introduces a variable amount of latency that depends on your system. Lowering this latency [requires a change in PulseAudio](https://gitlab.freedesktop.org/pulseaudio/pulseaudio/-/issues/120).
+Yant may introduce a small amount of latency for microphone filtering. The amount of inherent latency introduced by noise supression is 10ms, this is very low and should not be a problem.
 
-Output filtering currently introduces something on the order of ~100ms with pulseaudio. This should still be fine for regular conferences, VOIPing and gaming. Maybe not for competitive gaming teams.
+Output filtering currently introduces something on the order of ~100ms. This should still be fine for regular conferences, VOIPing and gaming. Maybe not for competitive gaming teams.
 
 ### Alternatives
 
