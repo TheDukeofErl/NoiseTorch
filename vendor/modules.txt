@@ -76,9 +76,6 @@ github.com/aarzilli/nucular/internal/assets
 github.com/aarzilli/nucular/label
 github.com/aarzilli/nucular/rect
 github.com/aarzilli/nucular/style
-# github.com/blang/semver/v4 v4.0.0
-## explicit
-github.com/blang/semver/v4
 # github.com/go-gl/glfw/v3.3/glfw v0.0.0-20211213063430-748e38ca8aec
 ## explicit
 github.com/go-gl/glfw/v3.3/glfw
@@ -100,13 +97,6 @@ github.com/hashicorp/golang-lru/simplelru
 # github.com/noisetorch/pulseaudio v0.0.0-20220603053345-9303200c3861
 ## explicit
 github.com/noisetorch/pulseaudio
-# github.com/syndtr/gocapability v0.0.0-20200815063812-42c35b437635
-## explicit
-github.com/syndtr/gocapability/capability
-# golang.org/x/crypto v0.0.0-20210921155107-089bfa567519
-## explicit
-golang.org/x/crypto/ed25519
-golang.org/x/crypto/ed25519/internal/edwards25519
 # golang.org/x/exp v0.0.0-20220104160115-025e73f80486
 ## explicit
 golang.org/x/exp/shiny/driver
