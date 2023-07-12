@@ -46,7 +46,6 @@ var appName = "yant"
 var nameSuffix = ""         // will be changed by build
 var version = "unknown"     // ditto
 var distribution = "custom" // ditto
-var publicKeyString = ""    // ditto
 var websiteURL = ""         // ditto
 
 func main() {
