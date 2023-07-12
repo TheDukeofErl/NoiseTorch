@@ -27,7 +27,6 @@ type ntcontext struct {
 	config                   *config
 	licenseTextArea          nucular.TextEditor
 	masterWindow             *nucular.MasterWindow
-	update                   updateui
 	reloadRequired           bool
 	haveCapabilities         bool
 	capsMismatch             bool
@@ -107,21 +106,6 @@ func mainView(ctx *ntcontext, w *nucular.Window) {
 	if ctx.serverInfo.servertype == servertype_pipewire {
 		w.Row(20).Dynamic(1)
 		w.Label("Running in PipeWire mode. PipeWire support is currently alpha quality. Please report bugs.", "LC")
-	}
-
-	if ctx.update.available && !ctx.update.triggered {
-		w.Row(20).Ratio(0.9, 0.1)
-		w.LabelColored("Update available! Click to install version: "+ctx.update.serverVersion, "LC", green)
-		if w.ButtonText("Update") {
-			ctx.update.triggered = true
-			go update(ctx)
-			(*ctx.masterWindow).Changed()
-		}
-	}
-
-	if ctx.update.triggered {
-		w.Row(20).Dynamic(1)
-		w.Label(ctx.update.updatingText, "CC")
 	}
 
 	if w.TreePush(nucular.TreeTab, "Settings", true) {

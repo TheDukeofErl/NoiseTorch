@@ -16,7 +16,6 @@ import (
 type config struct {
 	Threshold             int
 	DisplayMonitorSources bool
-	EnableUpdates         bool
 	FilterInput           bool
 	FilterOutput          bool
 	LastUsedInput         string
@@ -28,13 +27,9 @@ const configFile = "config.toml"
 func initializeConfigIfNot() {
 	log.Println("Checking if config needs to be initialized")
 
-	// if you're a package maintainer and you mess with this, we have a problem.
-	// Unless you set -tags release on the build the updater is *not* compiled in anymore. DO NOT MESS WITH THIS!
-	// This isn't and never was the proper location to disable the updater.
 	conf := config{
 		Threshold:             95,
 		DisplayMonitorSources: false,
-		EnableUpdates:         true,
 		FilterInput:           true,
 		FilterOutput:          false,
 		LastUsedInput:         "",

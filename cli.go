@@ -7,9 +7,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
-	"strings"
 
-	"github.com/blang/semver/v4"
 	"github.com/noisetorch/pulseaudio"
 )
 
@@ -22,7 +20,6 @@ type CLIOpts struct {
 	loadOutput  bool
 	threshold   int
 	list        bool
-	checkUpdate bool
 }
 
 func parseCLIOpts() CLIOpts {
@@ -35,29 +32,12 @@ func parseCLIOpts() CLIOpts {
 	flag.BoolVar(&opt.unload, "u", false, "Unload supressor")
 	flag.IntVar(&opt.threshold, "t", -1, "Voice activation threshold")
 	flag.BoolVar(&opt.list, "l", false, "List available PulseAudio devices")
-	flag.BoolVar(&opt.checkUpdate, "c", false, "Check if update is available (but do not update)")
 	flag.Parse()
 
 	return opt
 }
 
 func doCLI(opt CLIOpts, config *config, librnnoise string) {
-	if opt.checkUpdate {
-		latestRelease, err := getLatestRelease()
-		if err == nil {
-			latestVersion, _ := semver.Make(strings.TrimLeft(latestRelease, "v"))
-			currentVersion, _ := semver.Make(strings.TrimLeft(version, "v"))
-			if currentVersion.Compare(latestVersion) == -1 {
-				fmt.Println("New version available: " + latestRelease)
-			} else {
-				fmt.Println("No update available")
-			}
-		} else {
-			fmt.Println("Cannot look for updates right now.")
-		}
-		cleanupExit(librnnoise, 0)
-	}
-
 	if opt.setcap {
 		err := makeBinarySetcapped()
 		if err != nil {

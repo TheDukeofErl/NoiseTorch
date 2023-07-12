@@ -46,7 +46,6 @@ var appName = "NoiseTorch-ng"
 var nameSuffix = ""         // will be changed by build
 var version = "unknown"     // ditto
 var distribution = "custom" // ditto
-var updateURL = ""          // ditto
 var publicKeyString = ""    // ditto
 var websiteURL = ""         // ditto
 
@@ -74,10 +73,6 @@ func main() {
 	ctx.librnnoise = rnnoisefile
 
 	doCLI(opt, ctx.config, ctx.librnnoise)
-
-	if ctx.config.EnableUpdates {
-		go updateCheck(&ctx)
-	}
 
 	ctx.haveCapabilities = hasCapSysResource(getCurrentCaps())
 	ctx.capsMismatch = hasCapSysResource(getCurrentCaps()) != hasCapSysResource(getSelfFileCaps())
