@@ -13,7 +13,6 @@ import (
 
 type CLIOpts struct {
 	doLog       bool
-	setcap      bool
 	sinkName    string
 	unload      bool
 	loadInput   bool
@@ -25,7 +24,6 @@ type CLIOpts struct {
 func parseCLIOpts() CLIOpts {
 	var opt CLIOpts
 	flag.BoolVar(&opt.doLog, "log", false, "Print debugging output to stdout")
-	flag.BoolVar(&opt.setcap, "setcap", false, "for internal use only")
 	flag.StringVar(&opt.sinkName, "s", "", "Use the specified source/sink device ID")
 	flag.BoolVar(&opt.loadInput, "i", false, "Load supressor for input. If no source device ID is specified the default pulse audio source is used.")
 	flag.BoolVar(&opt.loadOutput, "o", false, "Load supressor for output. If no source device ID is specified the default pulse audio source is used.")
@@ -38,14 +36,6 @@ func parseCLIOpts() CLIOpts {
 }
 
 func doCLI(opt CLIOpts, config *config, librnnoise string) {
-	if opt.setcap {
-		err := makeBinarySetcapped()
-		if err != nil {
-			cleanupExit(librnnoise, 1)
-		}
-		cleanupExit(librnnoise, 0)
-	}
-
 	paClient, err := pulseaudio.NewClient()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Couldn't create pulseaudio client: %v\n", err)

@@ -9,7 +9,6 @@ import (
 	"log"
 	"os"
 	"os/exec"
-	"syscall"
 	"time"
 
 	"github.com/aarzilli/nucular"
@@ -28,8 +27,6 @@ type ntcontext struct {
 	licenseTextArea          nucular.TextEditor
 	masterWindow             *nucular.MasterWindow
 	reloadRequired           bool
-	haveCapabilities         bool
-	capsMismatch             bool
 	views                    *ViewStack
 	serverInfo               audioserverinfo
 	virtualDeviceInUse       bool
@@ -385,38 +382,6 @@ func connectView(ctx *ntcontext, w *nucular.Window) {
 	w.Label("Connecting to pulseaudio...", "CB")
 }
 
-func capabilitiesView(ctx *ntcontext, w *nucular.Window) {
-	w.Row(15).Dynamic(1)
-	w.Label("This program does not have the capabilities to function properly.", "CB")
-	w.Row(15).Dynamic(1)
-	w.Label("We require CAP_SYS_RESOURCE. If that doesn't mean anything to you, don't worry. I'll fix it for you.", "CB")
-	if ctx.capsMismatch {
-		w.Row(15).Dynamic(1)
-		w.LabelColored("Warning: File has CAP_SYS_RESOURCE but our process doesn't.", "CB", orange)
-		w.Row(15).Dynamic(1)
-		w.LabelColored("Check if your filesystem has nosuid set or check the troubleshooting page.", "CB", orange)
-	}
-	w.Row(40).Dynamic(1)
-	w.Row(25).Dynamic(1)
-	if w.ButtonText("Grant capability (requires root)") {
-		err := pkexecSetcapSelf()
-		if err != nil {
-			ctx.views.Push(makeErrorView(ctx, err.Error()))
-			return
-		}
-		self, err := os.Executable()
-		if err != nil {
-			ctx.views.Push(makeErrorView(ctx, err.Error()))
-			return
-		}
-		err = syscall.Exec(self, []string{""}, os.Environ())
-		if err != nil {
-			ctx.views.Push(makeErrorView(ctx, err.Error()))
-			return
-		}
-	}
-}
-
 func pulseAudioUnsupported(ctx *ntcontext, w *nucular.Window) {
 	w.Row(15).Dynamic(1)
 	w.Label("PulseAudio is no longer supported, please use Pipewire.", "CB")
@@ -476,10 +441,6 @@ func makeConfirmView(ctx *ntcontext, title, text, confirmText, denyText string, 
 func resetUI(ctx *ntcontext) {
 	ctx.views = NewViewStack()
 	ctx.views.Push(mainView)
-
-	// if !ctx.haveCapabilities {
-	// 	ctx.views.Push(capabilitiesView)
-	// }
 
 	if ctx.serverInfo.servertype == servertype_pulse {
 		ctx.views.Push(pulseAudioUnsupported)
