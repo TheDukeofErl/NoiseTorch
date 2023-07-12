@@ -53,7 +53,6 @@ func supressorState(ctx *ntcontext) (int, bool) {
 		inpLoaded = true
 	}
 
-	// TODO: verify this logic is still good
 	if (inpLoaded || !ctx.config.FilterInput) && !inputInc {
 		return loaded, virtualDeviceInUse
 	}

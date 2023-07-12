@@ -279,7 +279,6 @@ func inputSelection(ctx *ntcontext) (device, bool) {
 	return device{}, false
 }
 
-// TODO: verify logic is still good
 func validConfiguration(ctx *ntcontext, inpOk bool) bool {
 	return (!ctx.config.FilterInput || (ctx.config.FilterInput && inpOk)) &&
 		ctx.config.FilterInput &&
