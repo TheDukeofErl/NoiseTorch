@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=yant
+Comment=Yet another noise toole: create a virtual microphone that suppresses noise, in any application.
+Exec=yant
+Icon=yant
+Terminal=false
+Type=Application
+Categories=Audio;AudioVideo;Utility;

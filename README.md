@@ -1,6 +1,6 @@
 <h1 align="center"> yant</h1>
 <h3 align="center"> Yet another noise tool, a noise suppression program for Pipewire</h3>
-<p align="center"><img src="https://raw.githubusercontent.com/TheDukeofErl/yant/master/assets/icon/noisetorch.png" width="100" height="100"></p> 
+<p align="center"><img src="https://raw.githubusercontent.com/TheDukeofErl/yant/master/assets/icon/yant.png" width="100" height="100"></p> 
 
 
 <div align="center">
@@ -12,10 +12,10 @@
 
 [licence]: https://img.shields.io/badge/License-GPLv3-blue.svg
 [licence-url]: https://www.gnu.org/licenses/gpl-3.0
-[version]: https://img.shields.io/github/v/release/noisetorch/NoiseTorch?label=Latest&style=flat
-[version-url]: https://github.com/noisetorch/NoiseTorch/releases
-[stars-shield]: https://img.shields.io/github/stars/noisetorch/NoiseTorch?maxAge=2592000
-[stars-url]: https://github.com/noisetorch/NoiseTorch/stargazers/
+[version]: https://img.shields.io/github/v/release/TheDukeofErl/yant?label=Latest&style=flat
+[version-url]: https://github.com/TheDukeofErl/yant/releases
+[stars-shield]: https://img.shields.io/github/stars/TheDukeofErl/yant?maxAge=2592000
+[stars-url]: https://github.com/TheDukeofErl/yant/stargazers/
 
 Yet another noise tool, or yant, is an easy to use open source application for Linux with PipeWire. A fork from NoiseTorch/NoiseTorch-ng, it creates a virtual microphone that suppresses noise in any application using [RNNoise](https://github.com/xiph/rnnoise). Use whichever conferencing or VOIP application you like and simply select the filtered Virtual Microphone as input to torch the sound of your mechanical keyboard, computer fans, trains and the likes.
 

@@ -88,7 +88,7 @@ func main() {
 	style.Font = font.DefaultFont(16, 1)
 	wnd.SetStyle(style)
 
-	//this is a disgusting hack that searches for the noisetorch window
+	//this is a disgusting hack that searches for the window
 	//and then fixes up the WM_CLASS attribute so it displays
 	//properly in the taskbar
 	go fixWindowClass()

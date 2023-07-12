@@ -77,7 +77,7 @@ func writeConfig(conf *config) {
 }
 
 func configDir() string {
-	return filepath.Join(xdgOrFallback("XDG_CONFIG_HOME", filepath.Join(os.Getenv("HOME"), ".config")), "noisetorch")
+	return filepath.Join(xdgOrFallback("XDG_CONFIG_HOME", filepath.Join(os.Getenv("HOME"), ".config")), "yant")
 }
 
 func exists(path string) (bool, error) {
