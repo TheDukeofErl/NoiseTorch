@@ -17,9 +17,7 @@ type config struct {
 	Threshold             int
 	DisplayMonitorSources bool
 	FilterInput           bool
-	FilterOutput          bool
 	LastUsedInput         string
-	LastUsedOutput        string
 }
 
 const configFile = "config.toml"
@@ -31,9 +29,7 @@ func initializeConfigIfNot() {
 		Threshold:             95,
 		DisplayMonitorSources: false,
 		FilterInput:           true,
-		FilterOutput:          false,
-		LastUsedInput:         "",
-		LastUsedOutput:        ""}
+		LastUsedInput:         ""}
 
 	configdir := configDir()
 	ok, err := exists(configdir)

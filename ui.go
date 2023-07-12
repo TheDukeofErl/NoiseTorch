@@ -90,8 +90,7 @@ func mainView(ctx *ntcontext, w *nucular.Window) {
 		}
 	} else if ctx.noiseSupressorState == unloaded {
 		_, inpOk := inputSelection(ctx)
-		_, outOk := outputSelection(ctx)
-		if validConfiguration(ctx, inpOk, outOk) {
+		if validConfiguration(ctx, inpOk) {
 			w.LabelColored("Filtering inactive", "RC", red)
 		} else {
 			w.LabelColored("Filtering unconfigured", "RC", lightBlue)
@@ -137,12 +136,6 @@ func mainView(ctx *ntcontext, w *nucular.Window) {
 			go (func() { ctx.noiseSupressorState, _ = supressorState(ctx) })()
 		}
 
-		if w.CheckboxText("Filter Headphones", &ctx.config.FilterOutput) {
-			ctx.sourceListColdWidthIndex++ //recompute the with because of new elements
-			go writeConfig(ctx.config)
-			go (func() { ctx.noiseSupressorState, _ = supressorState(ctx) })()
-		}
-
 		w.TreePop()
 	}
 	if ctx.config.FilterInput && w.TreePush(nucular.TreeTab, "Select Microphone", true) {
@@ -159,33 +152,6 @@ func mainView(ctx *ntcontext, w *nucular.Window) {
 			w.LayoutFitWidth(0, 0)
 			if w.CheckboxText("", &el.checked) {
 				ensureOnlyOneInputSelected(&ctx.inputList, el)
-			}
-
-			w.LayoutFitWidth(ctx.sourceListColdWidthIndex, 0)
-			if el.dynamicLatency {
-				w.Label(el.Name, "LC")
-			} else {
-				w.LabelColored("(incompatible?) "+el.Name, "LC", orange)
-			}
-		}
-
-		w.TreePop()
-	}
-
-	if ctx.config.FilterOutput && w.TreePush(nucular.TreeTab, "Select Headphones", true) {
-		w.Row(15).Dynamic(1)
-		w.Label("Select an output device below:", "LC")
-
-		for i := range ctx.outputList {
-			el := &ctx.outputList[i]
-
-			if el.isMonitor && !ctx.config.DisplayMonitorSources {
-				continue
-			}
-			w.Row(15).Static()
-			w.LayoutFitWidth(0, 0)
-			if w.CheckboxText("", &el.checked) {
-				ensureOnlyOneInputSelected(&ctx.outputList, el)
 			}
 
 			w.LayoutFitWidth(ctx.sourceListColdWidthIndex, 0)
@@ -228,8 +194,7 @@ func mainView(ctx *ntcontext, w *nucular.Window) {
 	}
 
 	inp, inpOk := inputSelection(ctx)
-	out, outOk := outputSelection(ctx)
-	if validConfiguration(ctx, inpOk, outOk) {
+	if validConfiguration(ctx, inpOk) {
 		if w.ButtonText(txt) {
 			ctx.reloadRequired = false
 
@@ -239,11 +204,11 @@ func mainView(ctx *ntcontext, w *nucular.Window) {
 					"Some applications may behave weirdly when you reload a device they're currently using",
 					"Reload",
 					"Go back",
-					func() { uiReloadFilters(ctx, inp, out) },
+					func() { uiReloadFilters(ctx, inp) },
 					func() {})
 				ctx.views.Push(confirm)
 			} else {
-				go uiReloadFilters(ctx, inp, out)
+				go uiReloadFilters(ctx, inp)
 			}
 		}
 	} else {
@@ -267,14 +232,14 @@ func uiUnloadFilters(ctx *ntcontext) {
 	(*ctx.masterWindow).Changed()
 }
 
-func uiReloadFilters(ctx *ntcontext, inp, out device) {
+func uiReloadFilters(ctx *ntcontext, inp device) {
 	ctx.views.Push(loadingView)
 	if ctx.noiseSupressorState == loaded {
 		if err := unloadSupressor(ctx); err != nil {
 			log.Println(err)
 		}
 	}
-	if err := loadSupressor(ctx, &inp, &out); err != nil {
+	if err := loadSupressor(ctx, &inp); err != nil {
 		log.Println(err)
 	}
 
@@ -285,7 +250,6 @@ func uiReloadFilters(ctx *ntcontext, inp, out device) {
 		}
 	}
 	ctx.config.LastUsedInput = inp.ID
-	ctx.config.LastUsedOutput = out.ID
 	go writeConfig(ctx.config)
 	ctx.views.Pop()
 	(*ctx.masterWindow).Changed()
@@ -315,23 +279,10 @@ func inputSelection(ctx *ntcontext) (device, bool) {
 	return device{}, false
 }
 
-func outputSelection(ctx *ntcontext) (device, bool) {
-	if !ctx.config.FilterOutput {
-		return device{}, false
-	}
-
-	for _, out := range ctx.outputList {
-		if out.checked {
-			return out, true
-		}
-	}
-	return device{}, false
-}
-
-func validConfiguration(ctx *ntcontext, inpOk bool, outOk bool) bool {
+// TODO: verify logic is still good
+func validConfiguration(ctx *ntcontext, inpOk bool) bool {
 	return (!ctx.config.FilterInput || (ctx.config.FilterInput && inpOk)) &&
-		(!ctx.config.FilterOutput || (ctx.config.FilterOutput && outOk)) &&
-		(ctx.config.FilterInput || ctx.config.FilterOutput) &&
+		ctx.config.FilterInput &&
 		ctx.noiseSupressorState != inconsistent
 }
 
