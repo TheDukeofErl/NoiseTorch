@@ -1,4 +1,4 @@
-// This file is part of the program "NoiseTorch-ng".
+// This file is part of the program "yant".
 // Please see the LICENSE file for copyright information.
 
 package main
@@ -16,11 +16,8 @@ import (
 type config struct {
 	Threshold             int
 	DisplayMonitorSources bool
-	EnableUpdates         bool
 	FilterInput           bool
-	FilterOutput          bool
 	LastUsedInput         string
-	LastUsedOutput        string
 }
 
 const configFile = "config.toml"
@@ -28,17 +25,11 @@ const configFile = "config.toml"
 func initializeConfigIfNot() {
 	log.Println("Checking if config needs to be initialized")
 
-	// if you're a package maintainer and you mess with this, we have a problem.
-	// Unless you set -tags release on the build the updater is *not* compiled in anymore. DO NOT MESS WITH THIS!
-	// This isn't and never was the proper location to disable the updater.
 	conf := config{
 		Threshold:             95,
 		DisplayMonitorSources: false,
-		EnableUpdates:         true,
 		FilterInput:           true,
-		FilterOutput:          false,
-		LastUsedInput:         "",
-		LastUsedOutput:        ""}
+		LastUsedInput:         ""}
 
 	configdir := configDir()
 	ok, err := exists(configdir)
@@ -82,7 +73,7 @@ func writeConfig(conf *config) {
 }
 
 func configDir() string {
-	return filepath.Join(xdgOrFallback("XDG_CONFIG_HOME", filepath.Join(os.Getenv("HOME"), ".config")), "noisetorch")
+	return filepath.Join(xdgOrFallback("XDG_CONFIG_HOME", filepath.Join(os.Getenv("HOME"), ".config")), "yant")
 }
 
 func exists(path string) (bool, error) {

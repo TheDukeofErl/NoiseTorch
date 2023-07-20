@@ -1,4 +1,4 @@
-// This file is part of the program "NoiseTorch-ng".
+// This file is part of the program "yant".
 // Please see the LICENSE file for copyright information.
 
 package main
@@ -7,65 +7,33 @@ import (
 	"flag"
 	"fmt"
 	"os"
-	"strings"
 
-	"github.com/blang/semver/v4"
 	"github.com/noisetorch/pulseaudio"
 )
 
 type CLIOpts struct {
 	doLog       bool
-	setcap      bool
-	sinkName    string
+	sourceName  string
 	unload      bool
 	loadInput   bool
-	loadOutput  bool
 	threshold   int
 	list        bool
-	checkUpdate bool
 }
 
 func parseCLIOpts() CLIOpts {
 	var opt CLIOpts
 	flag.BoolVar(&opt.doLog, "log", false, "Print debugging output to stdout")
-	flag.BoolVar(&opt.setcap, "setcap", false, "for internal use only")
-	flag.StringVar(&opt.sinkName, "s", "", "Use the specified source/sink device ID")
+	flag.StringVar(&opt.sourceName, "s", "", "Use the specified source device ID")
 	flag.BoolVar(&opt.loadInput, "i", false, "Load supressor for input. If no source device ID is specified the default pulse audio source is used.")
-	flag.BoolVar(&opt.loadOutput, "o", false, "Load supressor for output. If no source device ID is specified the default pulse audio source is used.")
 	flag.BoolVar(&opt.unload, "u", false, "Unload supressor")
 	flag.IntVar(&opt.threshold, "t", -1, "Voice activation threshold")
 	flag.BoolVar(&opt.list, "l", false, "List available PulseAudio devices")
-	flag.BoolVar(&opt.checkUpdate, "c", false, "Check if update is available (but do not update)")
 	flag.Parse()
 
 	return opt
 }
 
 func doCLI(opt CLIOpts, config *config, librnnoise string) {
-	if opt.checkUpdate {
-		latestRelease, err := getLatestRelease()
-		if err == nil {
-			latestVersion, _ := semver.Make(strings.TrimLeft(latestRelease, "v"))
-			currentVersion, _ := semver.Make(strings.TrimLeft(version, "v"))
-			if currentVersion.Compare(latestVersion) == -1 {
-				fmt.Println("New version available: " + latestRelease)
-			} else {
-				fmt.Println("No update available")
-			}
-		} else {
-			fmt.Println("Cannot look for updates right now.")
-		}
-		cleanupExit(librnnoise, 0)
-	}
-
-	if opt.setcap {
-		err := makeBinarySetcapped()
-		if err != nil {
-			cleanupExit(librnnoise, 1)
-		}
-		cleanupExit(librnnoise, 0)
-	}
-
 	paClient, err := pulseaudio.NewClient()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Couldn't create pulseaudio client: %v\n", err)
@@ -93,12 +61,6 @@ func doCLI(opt CLIOpts, config *config, librnnoise string) {
 			fmt.Printf("\tDevice Name: %s\n\tDevice ID: %s\n\n", sources[i].Name, sources[i].ID)
 		}
 
-		fmt.Println("Sinks:")
-		sinks := getSinks(&ctx, paClient)
-		for i := range sinks {
-			fmt.Printf("\tDevice Name: %s\n\tDevice ID: %s\n\n", sinks[i].Name, sinks[i].ID)
-		}
-
 		cleanupExit(librnnoise, 0)
 	}
 
@@ -123,18 +85,18 @@ func doCLI(opt CLIOpts, config *config, librnnoise string) {
 	if opt.loadInput {
 		sources := getSources(&ctx, paClient)
 
-		if opt.sinkName == "" {
+		if opt.sourceName == "" {
 			defaultSource, err := getDefaultSourceID(paClient)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "No source specified to load and failed to load default source: %+v\n", err)
 				cleanupExit(librnnoise, 1)
 			}
-			opt.sinkName = defaultSource
+			opt.sourceName = defaultSource
 		}
 		for i := range sources {
-			if sources[i].ID == opt.sinkName {
+			if sources[i].ID == opt.sourceName {
 				sources[i].checked = true
-				err := loadSupressor(&ctx, &sources[i], &device{})
+				err := loadSupressor(&ctx, &sources[i])
 				if err != nil {
 					fmt.Fprintf(os.Stderr, "Error loading PulseAudio Module: %+v\n", err)
 					cleanupExit(librnnoise, 1)
@@ -142,33 +104,7 @@ func doCLI(opt CLIOpts, config *config, librnnoise string) {
 				cleanupExit(librnnoise, 0)
 			}
 		}
-		fmt.Fprintf(os.Stderr, "PulseAudio source not found: %s\n", opt.sinkName)
-		cleanupExit(librnnoise, 1)
-
-	}
-	if opt.loadOutput {
-		sinks := getSinks(&ctx, paClient)
-
-		if opt.sinkName == "" {
-			defaultSink, err := getDefaultSinkID(paClient)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "No sink specified to load and failed to load default sink: %+v\n", err)
-				cleanupExit(librnnoise, 1)
-			}
-			opt.sinkName = defaultSink
-		}
-		for i := range sinks {
-			if sinks[i].ID == opt.sinkName {
-				sinks[i].checked = true
-				err := loadSupressor(&ctx, &device{}, &sinks[i])
-				if err != nil {
-					fmt.Fprintf(os.Stderr, "Error loading PulseAudio Module: %+v\n", err)
-					cleanupExit(librnnoise, 1)
-				}
-				cleanupExit(librnnoise, 0)
-			}
-		}
-		fmt.Fprintf(os.Stderr, "PulseAudio sink not found: %s\n", opt.sinkName)
+		fmt.Fprintf(os.Stderr, "PulseAudio source not found: %s\n", opt.sourceName)
 		cleanupExit(librnnoise, 1)
 
 	}

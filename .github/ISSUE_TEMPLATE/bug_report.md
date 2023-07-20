@@ -24,13 +24,13 @@ A clear and concise description of what you expected to happen.
 If applicable, add screenshots to help explain your problem.
 
 **Logs**
-If applicable, add the link to a pastebin with the output of `noisetorch -log` and `pactl list short`.
+If applicable, add the link to a pastebin with the output of `yant -log` and `pactl list short`.
 
 **Desktop (please complete the following information):**
  - Distribution [e.g. Ubuntu 22.04, Arch]: 
  - DE [e.g. Plasma 5.24.5, GNOME 42.0]: 
  - Pulseaudio/Pipewire Version: 
- - NoiseTorch-ng Version [e.g. v0.12.0]:
+ - Yant Version [e.g. v0.12.0]:
 
 **Additional context**
 Add any other context about the problem here.

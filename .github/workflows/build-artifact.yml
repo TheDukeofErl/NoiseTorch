@@ -23,4 +23,4 @@ jobs:
       - uses: actions/upload-artifact@v3
         with:
           name: linux_x64
-          path: ${{ github.workspace }}/bin/noisetorch
+          path: ${{ github.workspace }}/bin/yant

@@ -1,4 +1,4 @@
-// This file is part of the program "NoiseTorch-ng".
+// This file is part of the program "yant".
 // Please see the LICENSE file for copyright information.
 
 package main
@@ -9,7 +9,6 @@ import (
 	"log"
 	"os"
 	"os/exec"
-	"syscall"
 	"time"
 
 	"github.com/aarzilli/nucular"
@@ -27,10 +26,7 @@ type ntcontext struct {
 	config                   *config
 	licenseTextArea          nucular.TextEditor
 	masterWindow             *nucular.MasterWindow
-	update                   updateui
 	reloadRequired           bool
-	haveCapabilities         bool
-	capsMismatch             bool
 	views                    *ViewStack
 	serverInfo               audioserverinfo
 	virtualDeviceInUse       bool
@@ -56,7 +52,7 @@ var red = color.RGBA{255, 70, 70, 255}
 var orange = color.RGBA{255, 140, 0, 255}
 var lightBlue = color.RGBA{173, 216, 230, 255}
 
-const notice = "NoiseTorch Next Gen (stylized NoiseTorch-ng) is a continuation of the NoiseTorch\nproject after it was abandoned by its original author. Please do not confuse\nboth programs. You may convey modified versions of this program under its name."
+const notice = "Yet another noise tool (yant) is a fork of NoiseTorch/NoiseTorch-ng."
 
 func updatefn(ctx *ntcontext, w *nucular.Window) {
 	currView := ctx.views.Peek()
@@ -94,8 +90,7 @@ func mainView(ctx *ntcontext, w *nucular.Window) {
 		}
 	} else if ctx.noiseSupressorState == unloaded {
 		_, inpOk := inputSelection(ctx)
-		_, outOk := outputSelection(ctx)
-		if validConfiguration(ctx, inpOk, outOk) {
+		if validConfiguration(ctx, inpOk) {
 			w.LabelColored("Filtering inactive", "RC", red)
 		} else {
 			w.LabelColored("Filtering unconfigured", "RC", lightBlue)
@@ -107,21 +102,6 @@ func mainView(ctx *ntcontext, w *nucular.Window) {
 	if ctx.serverInfo.servertype == servertype_pipewire {
 		w.Row(20).Dynamic(1)
 		w.Label("Running in PipeWire mode. PipeWire support is currently alpha quality. Please report bugs.", "LC")
-	}
-
-	if ctx.update.available && !ctx.update.triggered {
-		w.Row(20).Ratio(0.9, 0.1)
-		w.LabelColored("Update available! Click to install version: "+ctx.update.serverVersion, "LC", green)
-		if w.ButtonText("Update") {
-			ctx.update.triggered = true
-			go update(ctx)
-			(*ctx.masterWindow).Changed()
-		}
-	}
-
-	if ctx.update.triggered {
-		w.Row(20).Dynamic(1)
-		w.Label(ctx.update.updatingText, "CC")
 	}
 
 	if w.TreePush(nucular.TreeTab, "Settings", true) {
@@ -156,12 +136,6 @@ func mainView(ctx *ntcontext, w *nucular.Window) {
 			go (func() { ctx.noiseSupressorState, _ = supressorState(ctx) })()
 		}
 
-		if w.CheckboxText("Filter Headphones", &ctx.config.FilterOutput) {
-			ctx.sourceListColdWidthIndex++ //recompute the with because of new elements
-			go writeConfig(ctx.config)
-			go (func() { ctx.noiseSupressorState, _ = supressorState(ctx) })()
-		}
-
 		w.TreePop()
 	}
 	if ctx.config.FilterInput && w.TreePush(nucular.TreeTab, "Select Microphone", true) {
@@ -178,33 +152,6 @@ func mainView(ctx *ntcontext, w *nucular.Window) {
 			w.LayoutFitWidth(0, 0)
 			if w.CheckboxText("", &el.checked) {
 				ensureOnlyOneInputSelected(&ctx.inputList, el)
-			}
-
-			w.LayoutFitWidth(ctx.sourceListColdWidthIndex, 0)
-			if el.dynamicLatency {
-				w.Label(el.Name, "LC")
-			} else {
-				w.LabelColored("(incompatible?) "+el.Name, "LC", orange)
-			}
-		}
-
-		w.TreePop()
-	}
-
-	if ctx.config.FilterOutput && w.TreePush(nucular.TreeTab, "Select Headphones", true) {
-		w.Row(15).Dynamic(1)
-		w.Label("Select an output device below:", "LC")
-
-		for i := range ctx.outputList {
-			el := &ctx.outputList[i]
-
-			if el.isMonitor && !ctx.config.DisplayMonitorSources {
-				continue
-			}
-			w.Row(15).Static()
-			w.LayoutFitWidth(0, 0)
-			if w.CheckboxText("", &el.checked) {
-				ensureOnlyOneInputSelected(&ctx.outputList, el)
 			}
 
 			w.LayoutFitWidth(ctx.sourceListColdWidthIndex, 0)
@@ -247,8 +194,7 @@ func mainView(ctx *ntcontext, w *nucular.Window) {
 	}
 
 	inp, inpOk := inputSelection(ctx)
-	out, outOk := outputSelection(ctx)
-	if validConfiguration(ctx, inpOk, outOk) {
+	if validConfiguration(ctx, inpOk) {
 		if w.ButtonText(txt) {
 			ctx.reloadRequired = false
 
@@ -258,11 +204,11 @@ func mainView(ctx *ntcontext, w *nucular.Window) {
 					"Some applications may behave weirdly when you reload a device they're currently using",
 					"Reload",
 					"Go back",
-					func() { uiReloadFilters(ctx, inp, out) },
+					func() { uiReloadFilters(ctx, inp) },
 					func() {})
 				ctx.views.Push(confirm)
 			} else {
-				go uiReloadFilters(ctx, inp, out)
+				go uiReloadFilters(ctx, inp)
 			}
 		}
 	} else {
@@ -286,14 +232,14 @@ func uiUnloadFilters(ctx *ntcontext) {
 	(*ctx.masterWindow).Changed()
 }
 
-func uiReloadFilters(ctx *ntcontext, inp, out device) {
+func uiReloadFilters(ctx *ntcontext, inp device) {
 	ctx.views.Push(loadingView)
 	if ctx.noiseSupressorState == loaded {
 		if err := unloadSupressor(ctx); err != nil {
 			log.Println(err)
 		}
 	}
-	if err := loadSupressor(ctx, &inp, &out); err != nil {
+	if err := loadSupressor(ctx, &inp); err != nil {
 		log.Println(err)
 	}
 
@@ -304,7 +250,6 @@ func uiReloadFilters(ctx *ntcontext, inp, out device) {
 		}
 	}
 	ctx.config.LastUsedInput = inp.ID
-	ctx.config.LastUsedOutput = out.ID
 	go writeConfig(ctx.config)
 	ctx.views.Pop()
 	(*ctx.masterWindow).Changed()
@@ -334,23 +279,9 @@ func inputSelection(ctx *ntcontext) (device, bool) {
 	return device{}, false
 }
 
-func outputSelection(ctx *ntcontext) (device, bool) {
-	if !ctx.config.FilterOutput {
-		return device{}, false
-	}
-
-	for _, out := range ctx.outputList {
-		if out.checked {
-			return out, true
-		}
-	}
-	return device{}, false
-}
-
-func validConfiguration(ctx *ntcontext, inpOk bool, outOk bool) bool {
+func validConfiguration(ctx *ntcontext, inpOk bool) bool {
 	return (!ctx.config.FilterInput || (ctx.config.FilterInput && inpOk)) &&
-		(!ctx.config.FilterOutput || (ctx.config.FilterOutput && outOk)) &&
-		(ctx.config.FilterInput || ctx.config.FilterOutput) &&
+		ctx.config.FilterInput &&
 		ctx.noiseSupressorState != inconsistent
 }
 
@@ -401,35 +332,14 @@ func connectView(ctx *ntcontext, w *nucular.Window) {
 	w.Label("Connecting to pulseaudio...", "CB")
 }
 
-func capabilitiesView(ctx *ntcontext, w *nucular.Window) {
-	w.Row(15).Dynamic(1)
-	w.Label("This program does not have the capabilities to function properly.", "CB")
-	w.Row(15).Dynamic(1)
-	w.Label("We require CAP_SYS_RESOURCE. If that doesn't mean anything to you, don't worry. I'll fix it for you.", "CB")
-	if ctx.capsMismatch {
-		w.Row(15).Dynamic(1)
-		w.LabelColored("Warning: File has CAP_SYS_RESOURCE but our process doesn't.", "CB", orange)
-		w.Row(15).Dynamic(1)
-		w.LabelColored("Check if your filesystem has nosuid set or check the troubleshooting page.", "CB", orange)
-	}
-	w.Row(40).Dynamic(1)
-	w.Row(25).Dynamic(1)
-	if w.ButtonText("Grant capability (requires root)") {
-		err := pkexecSetcapSelf()
-		if err != nil {
-			ctx.views.Push(makeErrorView(ctx, err.Error()))
-			return
-		}
-		self, err := os.Executable()
-		if err != nil {
-			ctx.views.Push(makeErrorView(ctx, err.Error()))
-			return
-		}
-		err = syscall.Exec(self, []string{""}, os.Environ())
-		if err != nil {
-			ctx.views.Push(makeErrorView(ctx, err.Error()))
-			return
-		}
+func pulseAudioUnsupported(ctx *ntcontext, w *nucular.Window) {
+	w.Row(50).Dynamic(1)
+	w.Label("PulseAudio is no longer supported, please use Pipewire.", "CB")
+	w.Row(20).Dynamic(1)
+	w.Spacing(1)
+	if w.ButtonText("Exit") {
+		os.Exit(0)
+		return
 	}
 }
 
@@ -488,8 +398,8 @@ func resetUI(ctx *ntcontext) {
 	ctx.views = NewViewStack()
 	ctx.views.Push(mainView)
 
-	if !ctx.haveCapabilities {
-		ctx.views.Push(capabilitiesView)
+	if ctx.serverInfo.servertype == servertype_pulse {
+		ctx.views.Push(pulseAudioUnsupported)
 	}
 
 	if ctx.serverInfo.outdatedPipeWire {

@@ -1,4 +1,4 @@
-// This file is part of the program "NoiseTorch-ng".
+// This file is part of the program "yant".
 // Please see the LICENSE file for copyright information.
 
 package main
@@ -41,13 +41,11 @@ type device struct {
 	rate           uint32
 }
 
-var appName = "NoiseTorch-ng"
+var appName = "yant"
 
 var nameSuffix = ""         // will be changed by build
 var version = "unknown"     // ditto
 var distribution = "custom" // ditto
-var updateURL = ""          // ditto
-var publicKeyString = ""    // ditto
 var websiteURL = ""         // ditto
 
 func main() {
@@ -63,7 +61,6 @@ func main() {
 		log.SetOutput(ioutil.Discard)
 	}
 	log.Printf("Application starting. Version: %s (%s)\n", version, distribution)
-	log.Printf("CAP_SYS_RESOURCE: %t\n", hasCapSysResource(getCurrentCaps()))
 
 	initializeConfigIfNot()
 	rnnoisefile := dumpLib()
@@ -74,13 +71,6 @@ func main() {
 	ctx.librnnoise = rnnoisefile
 
 	doCLI(opt, ctx.config, ctx.librnnoise)
-
-	if ctx.config.EnableUpdates {
-		go updateCheck(&ctx)
-	}
-
-	ctx.haveCapabilities = hasCapSysResource(getCurrentCaps())
-	ctx.capsMismatch = hasCapSysResource(getCurrentCaps()) != hasCapSysResource(getSelfFileCaps())
 
 	resetUI(&ctx)
 
@@ -97,7 +87,7 @@ func main() {
 	style.Font = font.DefaultFont(16, 1)
 	wnd.SetStyle(style)
 
-	//this is a disgusting hack that searches for the noisetorch window
+	//this is a disgusting hack that searches for the window
 	//and then fixes up the WM_CLASS attribute so it displays
 	//properly in the taskbar
 	go fixWindowClass()
@@ -129,58 +119,21 @@ func getSources(ctx *ntcontext, client *pulseaudio.Client) []device {
 		log.Printf("Couldn't fetch sources from pulseaudio\n")
 	}
 
-	outputs := make([]device, 0)
-	for i := range sources {
-		if strings.Contains(sources[i].Name, "nui_") || strings.Contains(sources[i].Name, "Filtered") {
-			continue
-		}
-
-		var inp device
-
-		inp.ID = sources[i].Name
-		if ctx.serverInfo.servertype == servertype_pulse {
-			inp.Name = sources[i].PropList["device.description"]
-		} else {
-			inp.Name = sources[i].Description
-		}
-		inp.isMonitor = (sources[i].MonitorSourceIndex != 0xffffffff)
-		inp.rate = sources[i].SampleSpec.Rate
-
-		//PA_SOURCE_DYNAMIC_LATENCY = 0x0040U
-		inp.dynamicLatency = sources[i].Flags&uint32(0x0040) != 0
-
-		outputs = append(outputs, inp)
-	}
-
-	return outputs
-}
-
-func getSinks(ctx *ntcontext, client *pulseaudio.Client) []device {
-	sources, err := client.Sinks()
-	if err != nil {
-		log.Printf("Couldn't fetch sources from pulseaudio\n")
-	}
-
 	inputs := make([]device, 0)
 	for i := range sources {
 		if strings.Contains(sources[i].Name, "nui_") || strings.Contains(sources[i].Name, "Filtered") {
 			continue
 		}
 
-		log.Printf("Output %s, %+v\n", sources[i].Name, sources[i])
-
 		var inp device
 
 		inp.ID = sources[i].Name
-		if ctx.serverInfo.servertype == servertype_pulse {
-			inp.Name = sources[i].PropList["device.description"]
-		} else {
-			inp.Name = sources[i].Description
-		}
+		inp.Name = sources[i].Description
+		inp.isMonitor = (sources[i].MonitorSourceIndex != 0xffffffff)
 		inp.rate = sources[i].SampleSpec.Rate
 
-		// PA_SINK_DYNAMIC_LATENCY = 0x0080U
-		inp.dynamicLatency = sources[i].Flags&uint32(0x0080) != 0
+		//PA_SOURCE_DYNAMIC_LATENCY = 0x0040U
+		inp.dynamicLatency = sources[i].Flags&uint32(0x0040) != 0
 
 		inputs = append(inputs, inp)
 	}
@@ -216,7 +169,6 @@ func paConnectionWatchdog(ctx *ntcontext) {
 		go updateNoiseSupressorLoaded(ctx)
 
 		ctx.inputList = preselectDevice(ctx, getSources(ctx, paClient), ctx.config.LastUsedInput, getDefaultSourceID)
-		ctx.outputList = preselectDevice(ctx, getSinks(ctx, paClient), ctx.config.LastUsedOutput, getDefaultSinkID)
 
 		resetUI(ctx)
 		(*ctx.masterWindow).Changed()
@@ -320,14 +272,6 @@ func getDefaultSourceID(client *pulseaudio.Client) (string, error) {
 		return "", err
 	}
 	return server.DefaultSource, nil
-}
-
-func getDefaultSinkID(client *pulseaudio.Client) (string, error) {
-	server, err := client.ServerInfo()
-	if err != nil {
-		return "", err
-	}
-	return server.DefaultSink, nil
 }
 
 //this is disgusting
