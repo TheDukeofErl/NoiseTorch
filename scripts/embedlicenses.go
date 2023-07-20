@@ -36,15 +36,24 @@ func main() { //nolint
 				panic(inErr)
 			}
 			dir := filepath.Dir(rel)
-			out.WriteString("FILES: " + dir + "\n")
+			_, inErr = out.WriteString("FILES: " + dir + "\n")
+			if inErr != nil {
+				panic(inErr)
+			}
 			c, inErr := ioutil.ReadFile(path)
 			str := string(c)
 			str = strings.ReplaceAll(str, "`", "`"+" + \"`\" + `") // escape backticks in license text for go src
 			if inErr != nil {
 				panic(inErr)
 			}
-			out.WriteString(str)
-			out.WriteString("\n\n")
+			_, inErr = out.WriteString(str)
+			if inErr != nil {
+				panic(inErr)
+			}
+			_, inErr = out.WriteString("\n\n")
+			if inErr != nil {
+				panic(inErr)
+			}
 
 		}
 		return nil
@@ -52,5 +61,8 @@ func main() { //nolint
 	if err != nil {
 		panic(err)
 	}
-	out.Write([]byte("`\n"))
+	_, err = out.Write([]byte("`\n"))
+	if err != nil {
+		panic(err)
+	}
 }
